@@ -151,18 +151,11 @@ custom_executable(static_bridge
 target_link_libraries(static_bridge
   ${PROJECT_NAME})
 
-custom_executable(whitelist_bridge_1_to_2
-  "src/whitelist_bridge_1_to_2.cpp"
+custom_executable(whitelist_bridge
+  "src/whitelist_bridge.cpp"
   ROS1_DEPENDENCIES
   TARGET_DEPENDENCIES ${ros2_message_packages})
-target_link_libraries(whitelist_bridge_1_to_2
-  ${PROJECT_NAME})
-
-custom_executable(whitelist_bridge_2_to_1
-  "src/whitelist_bridge_2_to_1.cpp"
-  ROS1_DEPENDENCIES
-  TARGET_DEPENDENCIES ${ros2_message_packages})
-target_link_libraries(whitelist_bridge_2_to_1
+target_link_libraries(whitelist_bridge
   ${PROJECT_NAME})
 
 custom_executable(parameter_bridge
