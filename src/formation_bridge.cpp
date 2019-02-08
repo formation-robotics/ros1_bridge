@@ -25,8 +25,8 @@
 struct Bridge {
   std::string topic;
   std::string type;
-  BridgeHandles bridge_handles;
-}
+  ros1_bridge::BridgeHandles bridge_handles;
+};
 
 int main(int argc, char * argv[]) {
   std::string formation_node_uid;
