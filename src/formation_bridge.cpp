@@ -22,6 +22,12 @@
 #include "ros1_bridge/bridge.hpp"
 
 
+struct Bridge {
+  std::string topic;
+  std::string type;
+  BridgeHandles bridge_handles;
+}
+
 int main(int argc, char * argv[]) {
   std::string formation_node_uid;
   std::ifstream formation_node_uid_file;
@@ -29,7 +35,7 @@ int main(int argc, char * argv[]) {
   std::getline(formation_node_uid_file, formation_node_uid);
   formation_node_uid_file.close();
 
-  std::map<std::string, ros1_bridge::BridgeHandles> bridges;
+  std::map<std::string, Bridge> bridges;
 
   std::string name = "formation_bridge_";
   std::string node_name = name.append(formation_node_uid);
@@ -64,12 +70,12 @@ int main(int argc, char * argv[]) {
 
     size_t queue_size = 10;
     // Adding and replacing bridges
-    for (int i = 0; i < topics.size(); i++) {
+    for (uint i = 0; i < topics.size(); i++) {
       if (bridges.count(topics[i]) == 1) {
         if (bridges[topics[i]].type != types[i]) {
           std::cout << "replacing - " << topics[i] << " is now " << types[i] << std::endl;
           bridges.erase(topics[i]);
-          bridges[topics[i]] = ros1_bridge::create_bidirectional_bridge(
+          bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
             ros1_node,
             ros2_node,
             types[i],
@@ -80,7 +86,7 @@ int main(int argc, char * argv[]) {
         }
       } else {
         std::cout << "adding - " << types[i] << " " << topics[i] << std::endl;
-        bridges[topics[i]] = ros1_bridge::create_bidirectional_bridge(
+        bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
           ros1_node,
           ros2_node,
           types[i],
