@@ -48,7 +48,12 @@ int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
   auto ros2_node = rclcpp::Node::make_shared(node_name);
 
-  while (true) {
+  // ROS 1 asynchronous spinner
+  ros::AsyncSpinner async_spinner(1);
+  async_spinner.start();
+
+  // ROS 2 spinning loop
+  while (ros1_node.ok() && rclcpp::ok()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // Parsing topics and types
@@ -68,8 +73,8 @@ int main(int argc, char * argv[]) {
     }
     bridge_types_topics_file.close();
 
-    size_t queue_size = 10;
     // Adding and replacing bridges
+    size_t queue_size = 10;
     for (uint i = 0; i < topics.size(); i++) {
       if (bridges.count(topics[i]) == 1) {
         if (bridges[topics[i]].type != types[i]) {
@@ -106,17 +111,8 @@ int main(int argc, char * argv[]) {
         std::cout << "erasing - " << it->second.type << " " << it->second.topic << std::endl;
         bridges.erase(it++); // erase it - the adder and replacer skipped its processing.
       }
-    }    
-
-    // ROS 1 asynchronous spinner
-    ros::AsyncSpinner async_spinner(1);
-    async_spinner.start();
-
-    // ROS 2 spinning loop
-    rclcpp::executors::SingleThreadedExecutor executor;
-    while (ros1_node.ok() && rclcpp::ok()) {
-      executor.spin_node_once(ros2_node, std::chrono::milliseconds(500));
     }
+
   }
   return 0;
 }
