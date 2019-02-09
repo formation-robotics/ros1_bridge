@@ -28,6 +28,7 @@ struct Bridge {
   ros1_bridge::BridgeHandles bridge_handles;
 };
 
+
 int main(int argc, char * argv[]) {
   std::string formation_node_uid;
   std::ifstream formation_node_uid_file;
@@ -80,6 +81,9 @@ int main(int argc, char * argv[]) {
         if (bridges[topics[i]].type != types[i]) {
           std::cout << "replacing - " << topics[i] << " is now " << types[i] << std::endl;
           bridges.erase(topics[i]);
+          bridges[topics[i]] = Bridge();
+          bridges[topics[i]].topic = topics[i];
+          bridges[topics[i]].type = types[i];
           bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
             ros1_node,
             ros2_node,
@@ -91,6 +95,9 @@ int main(int argc, char * argv[]) {
         }
       } else {
         std::cout << "adding - " << types[i] << " " << topics[i] << std::endl;
+        bridges[topics[i]] = Bridge();
+        bridges[topics[i]].topic = topics[i];
+        bridges[topics[i]].type = types[i];
         bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
           ros1_node,
           ros2_node,
