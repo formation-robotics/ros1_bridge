@@ -30,9 +30,28 @@ struct Bridge {
 
 
 int main(int argc, char * argv[]) {
+  std::string formation_node_uid_filename;
+  std::string bridge_types_topics_filename;
+  std::string termination_flag_filename;
+
+  if (argc > 2) {
+    formation_node_uid_filename = argv[1];
+    bridge_types_topics_filename = argv[2];
+    termination_flag_filename = argv[3];
+  } else {
+    std::cout << "Error: must provide three arguments to formation_bridge node\n";
+    std::cout << "1) filename which contains formation node uid.\n";
+    std::cout << "2) filename where bridge types and topics will be written.\n";
+    std::cout << "3) filename where if file text is 'true', this process terminates\n";
+    return -1;
+  }
+
   std::string formation_node_uid;
-  std::ifstream formation_node_uid_file;
-  formation_node_uid_file.open("/opt/formation/.local_state/formation_node_uid");
+  std::ifstream formation_node_uid_file(formation_node_uid_filename.c_str());
+  if (!formation_node_uid_file.good()) {
+    std::cout << "Problem reading specified formation_node_uid file.\n";
+    return -1;
+  }
   std::getline(formation_node_uid_file, formation_node_uid);
   formation_node_uid_file.close();
 
@@ -59,7 +78,11 @@ int main(int argc, char * argv[]) {
 
     // Parsing topics and types
     std::ifstream bridge_types_topics_file;
-    bridge_types_topics_file.open("/opt/formation/.local_state/bridge_types_topics");
+    bridge_types_topics_file.open(bridge_types_topics_filename.c_str());
+    if (!bridge_types_topics_file.good()) {
+      std::cout << "Problem reading specified bridge_types_topics file.\n";
+      return -1;
+    }
     std::string line;
     std::vector<std::string> topics;
     std::vector<std::string> types;
@@ -118,6 +141,18 @@ int main(int argc, char * argv[]) {
         std::cout << "erasing - " << it->second.type << " " << it->second.topic << std::endl;
         bridges.erase(it++); // erase it - the adder and replacer skipped its processing.
       }
+    }
+
+    // Check if this process should terminate
+    std::ifstream termination_flag_file(termination_flag_filename.c_str());
+    if (!termination_flag_file.good()) {
+        std::cout << "Problem reading specified termination flag file.\n";
+        return -1;
+    }
+    std::stringstream buffer;
+    buffer << termination_flag_file.rdbuf();
+    if (std::strcmp("true", buffer.str().c_str()) == 0) {
+        return 0; // termination flag is set to "true", so we terminate with non-error value
     }
 
   }
