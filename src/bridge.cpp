@@ -88,6 +88,7 @@ create_bidirectional_bridge(
     ros2_type_name, topic_name, queue_size, ros1_type_name, topic_name, queue_size,
     handles.bridge1to2.ros2_publisher);
   return handles;
+}
 
 BridgeHandles
 create_bidirectional_prefix_bridge(
