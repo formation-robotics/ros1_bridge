@@ -120,7 +120,7 @@ int main(int argc, char * argv[]) {
             types[i],
             types[i],
             topics[i],
-            formation_node_uid.append(divider),
+            formation_node_uid + divider,
             queue_size
           );
         }
@@ -135,7 +135,7 @@ int main(int argc, char * argv[]) {
           types[i],
           types[i],
           topics[i],
-          formation_node_uid.append(divider),
+          formation_node_uid + divider,
           queue_size
         );
       }
