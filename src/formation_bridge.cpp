@@ -105,6 +105,7 @@ int main(int argc, char * argv[]) {
 
     // Adding and replacing bridges
     size_t queue_size = 10;
+    std::string divider = "/";
     for (uint i = 0; i < topics.size(); i++) {
       if (bridges.count(topics[i]) == 1) {
         if (bridges[topics[i]].type != types[i]) {
@@ -119,7 +120,7 @@ int main(int argc, char * argv[]) {
             types[i],
             types[i],
             topics[i],
-            formation_node_uid.append("/"),
+            formation_node_uid.append(divider),
             queue_size
           );
         }
@@ -134,7 +135,7 @@ int main(int argc, char * argv[]) {
           types[i],
           types[i],
           topics[i],
-          formation_node_uid.append("/"),
+          formation_node_uid.append(divider),
           queue_size
         );
       }

@@ -90,4 +90,46 @@ create_bidirectional_bridge(
   return handles;
 }
 
+BridgeHandles
+create_bidirectional_bridge(
+  ros::NodeHandle ros1_node,
+  rclcpp::Node::SharedPtr ros2_node,
+  const std::string & ros1_type_name,
+  const std::string & ros2_type_name,
+  const std::string & topic_name,
+  size_t queue_size)
+{
+  printf("create bidirectional bridge for topic [%s]\n", topic_name.c_str());
+  BridgeHandles handles;
+  handles.bridge1to2 = create_bridge_from_1_to_2(
+    ros1_node, ros2_node,
+    ros1_type_name, topic_name, queue_size, ros2_type_name, topic_name, queue_size);
+  handles.bridge2to1 = create_bridge_from_2_to_1(
+    ros2_node, ros1_node,
+    ros2_type_name, topic_name, queue_size, ros1_type_name, topic_name, queue_size,
+    handles.bridge1to2.ros2_publisher);
+  return handles;
+}
+
+create_bidirectional_prefix_bridge(
+  ros::NodeHandle ros1_node,
+  rclcpp::Node::SharedPtr ros2_node,
+  const std::string & ros1_type_name,
+  const std::string & ros2_type_name,
+  const std::string & topic_name,
+  const std::string & prefix,
+  size_t queue_size = 10)
+{
+  printf("create bidirectional bridge for topic [%s]\n", topic_name.c_str());
+  BridgeHandles handles;
+  handles.bridge1to2 = create_bridge_from_1_to_2(
+    ros1_node, ros2_node,
+    ros1_type_name, topic_name, queue_size, ros2_type_name, prefix.append(topic_name), queue_size);
+  handles.bridge2to1 = create_bridge_from_2_to_1(
+    ros2_node, ros1_node,
+    ros2_type_name, prefix.append(topic_name), queue_size, ros1_type_name, topic_name, queue_size,
+    handles.bridge1to2.ros2_publisher);
+  return handles;
+}
+
 }  // namespace ros1_bridge
