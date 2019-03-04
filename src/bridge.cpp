@@ -111,6 +111,7 @@ create_bidirectional_bridge(
   return handles;
 }
 
+BridgeHandles
 create_bidirectional_prefix_bridge(
   ros::NodeHandle ros1_node,
   rclcpp::Node::SharedPtr ros2_node,
@@ -118,7 +119,7 @@ create_bidirectional_prefix_bridge(
   const std::string & ros2_type_name,
   const std::string & topic_name,
   const std::string & prefix,
-  size_t queue_size = 10)
+  size_t queue_size)
 {
   printf("create bidirectional bridge for topic [%s]\n", topic_name.c_str());
   BridgeHandles handles;
