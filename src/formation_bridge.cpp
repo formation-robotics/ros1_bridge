@@ -22,27 +22,33 @@
 #include "ros1_bridge/bridge.hpp"
 
 
+std::string fractional_seconds_since_epoch() {
+  double fractional_seconds_since_epoch = std::chrono::duration_cast < std::chrono::duration < double > > (std::chrono::system_clock::now().time_since_epoch()).count();
+  return std::to_string(fractional_seconds_since_epoch);
+}
+
 struct Bridge {
   std::string topic;
   std::string type;
   ros1_bridge::BridgeHandles bridge_handles;
 };
 
-
 int main(int argc, char * argv[]) {
   std::string formation_node_uid_filename;
+  std::string heartbeat_filename;
   std::string bridge_types_topics_filename;
   std::string termination_flag_filename;
-
   if (argc > 2) {
     formation_node_uid_filename = argv[1];
-    bridge_types_topics_filename = argv[2];
-    termination_flag_filename = argv[3];
+    heartbeat_filename = argv[2];
+    bridge_types_topics_filename = argv[3];
+    termination_flag_filename = argv[4];
   } else {
     std::cout << "Error: must provide three arguments to formation_bridge node\n";
     std::cout << "1) filename which contains formation node uid.\n";
-    std::cout << "2) filename where bridge types and topics will be written.\n";
-    std::cout << "3) filename where if file text is 'true', this process terminates\n";
+    std::cout << "2) filename where current time will be continually written. (for checking the health of this process) \n";
+    std::cout << "3) filename where bridge types and topics will be written.\n";
+    std::cout << "4) filename where if file text is 'true', this process terminates\n";
     return -1;
   }
 
@@ -107,12 +113,13 @@ int main(int argc, char * argv[]) {
           bridges[topics[i]] = Bridge();
           bridges[topics[i]].topic = topics[i];
           bridges[topics[i]].type = types[i];
-          bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
+          bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_prefix_bridge(
             ros1_node,
             ros2_node,
             types[i],
             types[i],
             topics[i],
+            formation_node_uid,
             queue_size
           );
         }
@@ -121,12 +128,13 @@ int main(int argc, char * argv[]) {
         bridges[topics[i]] = Bridge();
         bridges[topics[i]].topic = topics[i];
         bridges[topics[i]].type = types[i];
-        bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_bridge(
+        bridges[topics[i]].bridge_handles = ros1_bridge::create_bidirectional_prefix_bridge(
           ros1_node,
           ros2_node,
           types[i],
           types[i],
           topics[i],
+          formation_node_uid,
           queue_size
         );
       }
@@ -142,6 +150,16 @@ int main(int argc, char * argv[]) {
         bridges.erase(it++); // erase it - the adder and replacer skipped its processing.
       }
     }
+
+    // Write time to file
+    std::ofstream heartbeat_file;
+    heartbeat_file.open(heartbeat_filename.c_str(), std::ofstream::out | std::ofstream::trunc);
+    if (!heartbeat_file.good()) {
+      std::cout << "Problem writing to specified heartbeat file.\n";
+      return -1;
+    }
+    heartbeat_file << fractional_seconds_since_epoch();
+    heartbeat_file.close();
 
     // Check if this process should terminate
     std::ifstream termination_flag_file(termination_flag_filename.c_str());
